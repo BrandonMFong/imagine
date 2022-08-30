@@ -18,6 +18,7 @@ const char * const AS_COMMAND = "as";
 // Conversion argument types
 const char * const PNG_TYPE_ARG = "png";
 const char * const JPEG_TYPE_ARG = "jpeg";
+const char * const GIF_TYPE_ARG = "gif";
 
 // Sub commands
 const char * const OUTPUT_ARG = "-o";
@@ -115,6 +116,8 @@ int AppDriver::handleAsCommand(Image * img) {
 			type = kImageTypePNG;
 		} else if (!strcmp(JPEG_TYPE_ARG, arg)) {
 			type = kImageTypeJPEG;
+		} else if (!strcmp(GIF_TYPE_ARG, arg)) {
+			type = kImageTypeGIF;
 		} else {
 			result = 3;
 			Error("Unknown type '%s'", arg);
@@ -134,11 +137,11 @@ int AppDriver::handleAsCommand(Image * img) {
 
 	if (result == 0) {
 		if (result = img->load()) {
-			printf("Error with loading: %d\n", result);
+			Error("loading: %d", result);
 		} else if (result = img->convertToType(type, outputPath)) {
-			printf("Error with converting to type %d: %d\n", type, result);
+			Error("converting to type %d: %d", type, result);
 		} else if (result = img->unload()) {
-			printf("Error with unloading: %d\n", result);
+			Error("unloading: %d", result);
 		}
 	}
 

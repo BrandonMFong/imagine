@@ -29,7 +29,8 @@ public:
 	virtual ~Image();
 
 	/** Details
-	 * 	Prints the standard details.  Override if you would like to print more
+	 * 	Prints the standard details.  Override if you 
+	 * 	would like to print more
 	 */
 	virtual int details();
 
@@ -56,9 +57,17 @@ protected:
 	// Returns type represented as an enum value
 	virtual ImageType type() = 0;
 	
+	/**
+	 * Derived classes should return a brief description of the image type
+	 *
+	 * Example would be spelling out the acronym
+	 */
+	virtual const char * description() = 0;
+	
 	// Specific conversions
-	virtual int toPNG() = 0;
-	virtual int toJPEG() = 0;
+	virtual int toPNG();
+	virtual int toJPEG();
+	virtual int toGIF();
 
 	// Prints the color space type as a string
 	const char * colorspaceString();

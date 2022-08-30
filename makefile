@@ -2,43 +2,83 @@
 # date: 7/29/22
 #
 
-CPPFLAGS += -I. -Iexternal/libs/bin/ -Iexternal
-CFLAGS += -I. -Iexternal/libs/bin/ -Iexternal
-BIN_NAME = imagine
-BUILD_PATH = build/release
-MAIN_FILE = src/main.cpp
-LIBRARIES = external/libs/bin/cpplib.a
-all: setup sources main
+### Global
+BUILD_PATH = build
+FILES = appdriver image png jpeg gif
 
-debug: CPPFLAGS += -DDEBUG -g
-debug: CFLAGS += -DDEBUG -g
-debug: BIN_NAME = debug-imagine
-debug: BUILD_PATH = build/debug
-debug: LIBRARIES = external/libs/bin/debug-cpplib.a
-debug: setup sources main
+### Release settings
+R_CXXFLAGS += -I. -Iexternal/libs/bin/ -Iexternal
+R_CFLAGS += -I. -Iexternal/libs/bin/ -Iexternal
+R_BIN_NAME = imagine
+R_BUILD_PATH = $(BUILD_PATH)/release
+R_MAIN_FILE = src/main.cpp
+R_LIBRARIES = external/libs/bin/cpplib.a
+R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
 
-test: CPPFLAGS += -DTESTING -g -Isrc/ -Iexternal/libs/cpplib/testbench
-test: CFLAGS += -DTESTING -g -Isrc/ -Iexternal/libs/clib/testbench
-test: BIN_NAME = test-imagine
-test: BUILD_PATH = build/test
-test: MAIN_FILE = src/testbench/tests.cpp
-test: setup sources main
-	./bin/$(BIN_NAME)
+### Debug settings
+D_CXXFLAGS = $(R_CXXFLAGS) -DDEBUG -g
+D_CFLAGS = $(R_CFLAGS) -DDEBUG -g
+D_BIN_NAME = debug-imagine
+D_BUILD_PATH = $(BUILD_PATH)/debug
+D_MAIN_FILE = $(R_MAIN_FILE)
+D_LIBRARIES = external/libs/bin/debug-cpplib.a
+D_OBJECTS = $(patsubst %, $(D_BUILD_PATH)/%.o, $(FILES))
+
+### Test settings
+T_CXXFLAGS = $(R_CXXFLAGS) -g -DTESTING -Isrc/ -Iexternal/libs/cpplib/testbench/
+T_CFLAGS = $(R_CFLAGS) -g -DTESTING -Isrc/ -Iexternal/libs/clib/testbench
+T_BIN_NAME = test-imagine
+T_BUILD_PATH = $(BUILD_PATH)/test
+T_MAIN_FILE = src/testbench/tests.cpp
+T_LIBRARIES = external/libs/bin/debug-cpplib.a
+T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
+
+### Instructions
+
+# Default
+all: release
 
 clean:
 	rm -rfv build
 	rm -rfv bin
 
-setup:
-	mkdir -p $(BUILD_PATH)
-	mkdir -p bin
+## Release build instructions
+release: release-setup bin/$(R_BIN_NAME)
 
-sources:
-	g++ -c src/image.cpp -o $(BUILD_PATH)/image.o $(CPPFLAGS)
-	g++ -c src/png.cpp -o $(BUILD_PATH)/png.o $(CPPFLAGS)
-	g++ -c src/jpeg.cpp -o $(BUILD_PATH)/jpeg.o $(CPPFLAGS)
-	g++ -c src/appdriver.cpp -o $(BUILD_PATH)/appdriver.o $(CPPFLAGS)
+release-setup:
+	@mkdir -p $(R_BUILD_PATH)
+	@mkdir -p bin
 
-main:
-	g++ -o bin/$(BIN_NAME) $(MAIN_FILE) $(BUILD_PATH)/appdriver.o $(BUILD_PATH)/image.o $(BUILD_PATH)/png.o $(BUILD_PATH)/jpeg.o $(LIBRARIES) -lpng -ljpeg $(CPPFLAGS)
+bin/$(R_BIN_NAME): $(R_MAIN_FILE) $(R_OBJECTS) $(R_LIBRARIES)
+	g++ -o $@ $^ -lpng -ljpeg $(R_CXXFLAGS)
+
+$(R_BUILD_PATH)/%.o: src/%.cpp src/%.hpp
+	g++ -c $< -o $@ $(R_CXXFLAGS)
+
+## Debug build instructions
+debug: debug-setup bin/$(D_BIN_NAME)
+
+debug-setup:
+	@mkdir -p $(D_BUILD_PATH)
+	@mkdir -p bin
+
+bin/$(D_BIN_NAME): $(D_MAIN_FILE) $(D_OBJECTS) $(D_LIBRARIES)
+	g++ -o $@ $^ -lpng -ljpeg $(D_CXXFLAGS)
+
+$(D_BUILD_PATH)/%.o: src/%.cpp src/%.hpp
+	g++ -c $< -o $@ $(D_CXXFLAGS)
+
+## Test build instructions
+test: test-setup bin/$(T_BIN_NAME)
+	./bin/$(T_BIN_NAME)
+
+test-setup:
+	@mkdir -p $(T_BUILD_PATH)
+	@mkdir -p bin
+
+bin/$(T_BIN_NAME): $(T_MAIN_FILE) $(T_OBJECTS) $(T_LIBRARIES)
+	g++ -o $@ $^ -lpng -ljpeg $(T_CXXFLAGS)
+
+$(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp
+	g++ -c $< -o $@ $(T_CXXFLAGS)
 

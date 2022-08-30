@@ -36,6 +36,7 @@ public:
 	int unload();
 	ImagineColorSpace colorspace();
 	int bitsPerComponent();
+	const char * description();
 
 private:
 	// Holds the jpeg decompressed data

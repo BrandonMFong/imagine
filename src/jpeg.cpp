@@ -18,7 +18,7 @@ extern "C" {
 #include <png.h>
 }
 
-int FILE_EXTENSION_ARRAY_SIZE = 3;
+const int FILE_EXTENSION_ARRAY_SIZE = 3;
 const char * const FILE_EXTENSION_ARRAY[] = {"jpeg", "jpg", "JPG"};
 
 bool JPEG::isType(const char * path) {
@@ -34,6 +34,10 @@ bool JPEG::isType(const char * path) {
 	}
 
 	return false;
+}
+
+const char * JPEG::description() {
+	return "JPEG";
 }
 
 int JPEG::imagineColorSpaceToJPEGColorSpace(ImagineColorSpace cs) {

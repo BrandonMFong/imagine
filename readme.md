@@ -2,4 +2,5 @@
 ## Dependencies
 - libpng
 - libjpeg
+- rapidxml
 

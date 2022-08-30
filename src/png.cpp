@@ -35,6 +35,10 @@ bool PNG::isType(const char * path) {
 	return result;
 }
 
+const char * PNG::description() {
+	return "PNG";
+}
+
 PNG::PNG(const char * path, int * err) : Image(path, err) {
 	this->_pngStruct = NULL;
 	this->_pngInfo = NULL;

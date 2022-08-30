@@ -51,6 +51,16 @@ int test_JPEG(int * p, int * f) {
 	return 0;
 }
 
+int test_GIF(int * p, int * f) {
+	int pass = 0, fail = 0;
+	INTRO_TEST_FUNCTION;
+	
+	if (p) *p = pass;
+	if (f) *f = fail;
+
+	return 0;
+}
+
 int test_Image(int * p, int * f) {
 	int pass = 0, fail = 0;
 	INTRO_TEST_FUNCTION;
@@ -89,7 +99,14 @@ int main() {
 
 	printf("\nPass: %d\n", pass);
 	printf("Fail: %d\n", fail);
+	
+	printf("\n---------------------------\n");
+	printf("\nStarting GIF tests...\n\n");
+	test_GIF(&pass, &fail);
 
+	printf("\nPass: %d\n", pass);
+	printf("Fail: %d\n", fail);
+	
 	printf("\n---------------------------\n");
 	printf("\nStarting Image tests...\n\n");
 	test_Image(&pass, &fail);

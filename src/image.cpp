@@ -6,6 +6,7 @@
 #include "image.hpp"
 #include "png.hpp"
 #include "jpeg.hpp"
+#include "gif.hpp"
 #include <cpplib.hpp>
 
 extern "C" {
@@ -21,6 +22,8 @@ Image * Image::createImage(const char * path, int * err) {
 		result = new PNG(path, &error);
 	} else if (JPEG::isType(path)) {
 		result = new JPEG(path, &error);
+	} else if (GIF::isType(path)) {
+		result = new GIF(path, &error);
 	} else {
 		Error("Unsupported file type for path '%s'", path);
 		error = 1;
@@ -56,10 +59,27 @@ int Image::convertToType(ImageType type) {
 			return this->toPNG();
 		case kImageTypeJPEG:
 			return this->toJPEG();
+		case kImageTypeGIF:
+			return this->toGIF();
 		default:
 			Error("Unknown type: %d", type);
 			return 1;
 	}
+}
+
+int Image::toPNG() {
+	Error("Cannot convert '%s' image to PNG", this->description());
+	return 1;
+}
+
+int Image::toJPEG() {
+	Error("Cannot convert '%s' image to JPEG", this->description());
+	return 1;
+}
+
+int Image::toGIF() {
+	Error("Cannot convert '%s' image to GIF", this->description());
+	return 1;
 }
 
 int Image::convertToType(ImageType type, const char * path) {

@@ -25,6 +25,7 @@ public:
 	int unload();
 	ImagineColorSpace colorspace();
 	int bitsPerComponent();
+	const char * description();
 
 private:
 	void * _pngStruct;
