@@ -4,3 +4,7 @@ a.out
 build
 bin
 testdata
+
+# Hide our libs
+external/libs
+

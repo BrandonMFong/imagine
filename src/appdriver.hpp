@@ -3,6 +3,9 @@
  * date: 7/22/22
  */
 
+#ifndef APPDRIVER_HPP
+#define APPDRIVER_HPP
+
 #include <array.hpp>
 
 class Image;
@@ -15,12 +18,13 @@ public:
 	int run();
 	void help();
 
-	const Array<char *> * args() {
-		return this->_args;
-	}
+	const Array<const char *> * args();
 
 private:
 	int handleAsCommand(Image * img);
 	int handleDetailsCommand(Image * img);
-	Array<char *> * _args;
+	Array<const char *> * _args;
 };
+
+#endif // APPDRIVER_HPP
+

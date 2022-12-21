@@ -4,6 +4,8 @@
 
 #include "imagetypes.h"
 #include "file.hpp"
+#include <dictionary.hpp>
+#include <string.hpp>
 
 extern "C" {
 #include <filesystem.h>
@@ -50,6 +52,13 @@ public:
 	// Processing
 	virtual int load() = 0;
 	virtual int unload() = 0;
+
+	/**
+	 * Requires derived classes to compile its own metadata
+	 *
+	 * param `metadata`: output dictionary that will have metadata
+	 */
+	virtual int compileMetadata(Dictionary<String, String> * metadata) = 0;
 
 protected:
 	Image(const char * path, int * err);

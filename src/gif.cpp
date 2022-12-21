@@ -432,27 +432,6 @@ const char * GIF::version() {
 	return (const char *) this->_gifReserved;
 }
 
-int GIF::details() {
-	char buf[10];
-	int result = this->Image::details();
-
-	if (result == 0) {
-		printf("GIF Version: %s\n", this->version());
-
-		strncpy(buf, this->_extApplication.id, 8);
-		buf[8] = '\0';
-		printf("Application ID: %s\n", buf);
-		
-		strncpy(buf, (char *) this->_extApplication.authCode, 3);
-		buf[3] = '\0';
-		printf("Application Authentication Code: %s\n", buf);
-
-		printf("Sub image Count: %d\n", this->_imageData.count());
-	}
-
-	return result;
-}
-
 ImaginePixels GIF::width() {
 	return (this->_header.width[1] << 8) | this->_header.width[0];
 }
@@ -477,5 +456,24 @@ ImageType GIF::type() {
 int GIF::toGIF() {
 	Error("'%s' is already a gif file!", this->path());
 	return 1;
+}
+
+int GIF::compileMetadata(Dictionary<String, String> * metadata) {
+	int result = 0;
+	char buf[0xff];
+
+	sprintf(buf, "%d", this->width());
+	metadata->setValueForKey("Width", buf);
+	sprintf(buf, "%d", this->height());
+	metadata->setValueForKey("Height", buf);
+	metadata->setValueForKey("Version", this->version());
+	strncpy(buf, this->_extApplication.id, 8);
+	metadata->setValueForKey("App ID", buf);
+	strncpy(buf, (char *) this->_extApplication.authCode, 3);
+	metadata->setValueForKey("Auth Code", buf);
+	sprintf(buf, "%d", this->_imageData.count());
+	metadata->setValueForKey("Image Count", buf);
+
+	return result;
 }
 

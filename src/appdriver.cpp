@@ -7,6 +7,7 @@
 #include <string.h>
 #include "image.hpp"
 #include <cpplib.hpp>
+#include <libgen.h>
 
 // Shared instance varaible
 AppDriver * APP_DRIVER = 0;
@@ -24,8 +25,11 @@ const char * const GIF_TYPE_ARG = "gif";
 const char * const OUTPUT_ARG = "-o";
 
 void AppDriver::help() {
-	char * buf = basename(this->_args->objectAtIndex(0));
-	printf("usage: %s <path> <commands>\n", buf);
+	const char * bin = this->_args->objectAtIndex(0);
+	char buf[PATH_MAX];
+	strcpy(buf, bin);
+	char * name = basename(buf);
+	printf("usage: %s <path> <commands>\n", name);
 
 	printf("\n");
 
@@ -37,24 +41,14 @@ void AppDriver::help() {
 	printf("\n");
 }
 
-/**
- * Comparator for the args
- */
-ArrayComparisonResult ArgumentCompare(char * a, char * b) {
-	if (strcmp(a, b) == 0) return kArrayComparisonResultEquals;
-	else if (strcmp(a, b) == -1) return kArrayComparisonResultLessThan;
-	else if (strcmp(a, b) == 1) return kArrayComparisonResultGreaterThan;
-	else return kArrayComparisonResultUnknown;
-}
-
 AppDriver::AppDriver(int argc, char * argv[], int * err) {
 	int error = err ? *err : 1;
-	this->_args = new Array<char *>(argv, argc);
+	this->_args = new Array<const char *>((const char **) argv, argc);
 
 	if (this->_args == 0) {
 		error = 1;
 	} else {
-		this->_args->setComparator(ArgumentCompare);
+		this->_args->setComparator(strcmp);
 	}
 	
 	if (err) *err = error;
@@ -67,6 +61,10 @@ AppDriver::~AppDriver() {
 	APP_DRIVER = 0;
 }
 
+const Array<const char *> * AppDriver::args() {
+	return this->_args;
+}
+
 int AppDriver::run() {
 	int result = 0;
 	Image * img = 0;
@@ -75,7 +73,7 @@ int AppDriver::run() {
 		this->help();
 		result = 1;
 	} else {
-		char * path = this->_args->objectAtIndex(1);
+		const char * path = this->_args->objectAtIndex(1);
 		img = Image::createImage(path, &result);
 	}
 

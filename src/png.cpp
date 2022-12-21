@@ -17,11 +17,6 @@ extern "C" {
 
 using namespace rapidxml;
 
-/**
- * Prints the xmpData xml buffer using rapidxml
- */
-int PNGPrintXMPData(char * xmpData);
-
 bool PNG::isType(const char * path) {
 	char buf[10];
 	int error = GetFileExtensionForPath(path, buf);
@@ -237,6 +232,7 @@ int PNG::unload() {
 	return 0;
 }
 
+/*
 int PNG::details() {
 	int result = this->Image::details();
 	
@@ -251,8 +247,12 @@ int PNG::details() {
 
 	return result;
 }
+*/
 
-int PNGPrintXMPData(char * xmpData) {
+/**
+ * Prints the xmpData xml buffer using rapidxml
+ */
+int PNGLoadXMPData(char * xmpData, Dictionary<String, String> * metadata) {
 	int result = 0;
 	xml_document<> doc;
 	doc.parse<0>(xmpData);
@@ -267,23 +267,34 @@ int PNGPrintXMPData(char * xmpData) {
 	} else {
 		if (valNode = node->first_node("exif:GPSLongitude")) {
 			printf("\tLongitude: %s\n", valNode->value());
+			metadata->setValueForKey("Longitude", valNode->value());
 		}
 
 		if (valNode = node->first_node("exif:GPSLatitude")) {
 			printf("\tLatidude: %s\n", valNode->value());
-		}
-
-		if (valNode = node->first_node("xmp:CreateDate")) {
-			printf("\tCreation Date: %s\n", valNode->value());
-		}
-
-		if (valNode = node->first_node("xmp:ModifyDate")) {
-			printf("\tLast Modified Date: %s\n", valNode->value());
+			metadata->setValueForKey("Latitude", valNode->value());
 		}
 
 		if (valNode = node->first_node("exifEX:LensModel")) {
 			printf("\tLens model: %s\n", valNode->value());
+			metadata->setValueForKey("Lens Model", valNode->value());
 		}
+	}
+
+	return result;
+}
+
+int PNG::compileMetadata(Dictionary<String, String> * metadata) {
+	int result = 0;
+	char buf[0xff];
+
+	sprintf(buf, "%d", this->width());
+	metadata->setValueForKey("Width", buf);
+	sprintf(buf, "%d", this->height());
+	metadata->setValueForKey("Height", buf);
+
+	if (this->_xmpBuf) {
+		result = PNGLoadXMPData(this->_xmpBuf, metadata);
 	}
 
 	return result;

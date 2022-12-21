@@ -95,6 +95,14 @@ ImagineColorSpace JPEG::colorspace() {
 	return kImagineColorSpaceUnknown;
 }
 
+void JPEGErrorExit(j_common_ptr cinfo) {
+	printf("Error");
+}
+
+void JPEGErrorMessage(j_common_ptr cinfo, int msg_level) {
+
+}
+
 int JPEG::load() {
 	int result = 0;
 	struct jpeg_decompress_struct * cinfo = NULL;
@@ -117,9 +125,11 @@ int JPEG::load() {
 	// Init the reading of the jpeg file with reading the header first
 	if (result == 0) {
 		cinfo->err = jpeg_std_error(&pub);
+		cinfo->err->error_exit = JPEGErrorExit;
+		cinfo->err->emit_message = JPEGErrorMessage;
 		jpeg_create_decompress(cinfo);
 		jpeg_stdio_src(cinfo, this->_fileHandler);
-		if (jpeg_read_header(cinfo, TRUE) != JPEG_HEADER_OK) {
+		if (jpeg_read_header(cinfo, true) != JPEG_HEADER_OK) {
 			result = 3;
 			Error("Error reading header");
 		}
@@ -139,7 +149,7 @@ int JPEG::load() {
 		this->_decompressionInfo = cinfo;
 	} else {
 		Error("Error loading image '%s': %d", this->path(), result);
-		free(cinfo);
+		Free(cinfo);
 	}
 
 	return result;
@@ -283,5 +293,18 @@ int JPEG::toJPEG() {
 
 ImageType JPEG::type() {
 	return kImageTypeJPEG;
+}
+
+int JPEG::compileMetadata(Dictionary<String, String> * metadata) {
+	//printf("Width: %d\n", this->width());
+	//printf("Height: %d\n", this->height());
+	//printf("Color space: %s\n", this->colorspaceString());
+	//printf("Bits per component: %d\n", this->bitsPerComponent());
+	//char buf[0xff];
+
+	//sprintf(buf, "%d", this->width());
+	//metadata->setValueForKey("Width", buf);
+
+	return 0;
 }
 

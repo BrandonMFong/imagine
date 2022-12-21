@@ -45,12 +45,31 @@ Image::~Image() {
 }
 
 int Image::details() {
+	/*
 	printf("Width: %d\n", this->width());
 	printf("Height: %d\n", this->height());
 	printf("Color space: %s\n", this->colorspaceString());
 	printf("Bits per component: %d\n", this->bitsPerComponent());
+	*/
+	Dictionary<String, String> metadata;
+	Dictionary<String, String>::Iterator * itr = 0;
 
-	return 0;
+	int result = this->compileMetadata(&metadata);
+
+	if (!result) {
+		result = metadata.createIterator(&itr);
+	}
+
+	while (!result && !itr->finished()) {
+		Dictionary<String, String>::Entry * e = itr->current();
+
+		std::cout << e->key() << " : " << e->value() << std::endl;
+		result = itr->next();
+	}
+
+	Delete(itr);
+
+	return result;
 }
 
 int Image::convertToType(ImageType type) {

@@ -1,0 +1,31 @@
+#!/usr/bin/bash
+
+result=0;
+
+function installLib() {
+	if [ $result -eq 0 ]; then 
+		git clone https://github.com/BrandonMFong/libs.git external/libs;
+		result=$?;
+	fi
+
+	if [ $result -eq 0 ]; then 
+		pushd external/libs;
+		make;
+		result=$?;
+		popd;
+	fi
+}
+
+function main() {
+
+	installLib;
+
+	if [ $result -ne 0 ]; then
+		echo "Error with configure $result";
+	fi
+}
+
+main;
+
+exit $result;
+

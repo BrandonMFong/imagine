@@ -206,7 +206,6 @@ private:
 
 // required 
 public:
-	int details();
 	ImaginePixels width();
 	ImaginePixels height();
 	int bitsPerComponent();
@@ -216,6 +215,7 @@ public:
 	ImageType type();
 	int toGIF();
 	const char * description();
+	int compileMetadata(Dictionary<String, String> * metadata);
 };
 
 #endif // GIF_HPP

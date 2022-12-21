@@ -18,7 +18,6 @@ public:
 	ImageType type();
 	int toPNG();
 	int toJPEG();
-	int details();
 	ImaginePixels width();
 	ImaginePixels height();
 	int load();
@@ -26,6 +25,7 @@ public:
 	ImagineColorSpace colorspace();
 	int bitsPerComponent();
 	const char * description();
+	int compileMetadata(Dictionary<String, String> * metadata);
 
 private:
 	void * _pngStruct;

@@ -1,3 +1,0 @@
-[submodule "external/libs"]
-	path = external/libs
-	url = https://github.com/BrandonMFong/libs.git

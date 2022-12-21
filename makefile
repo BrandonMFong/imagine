@@ -7,12 +7,12 @@ BUILD_PATH = build
 FILES = appdriver image png jpeg gif
 
 ### Release settings
-R_CXXFLAGS += -I. -Iexternal/libs/bin/ -Iexternal
-R_CFLAGS += -I. -Iexternal/libs/bin/ -Iexternal
+R_CXXFLAGS += -I. -Iexternal/libs/bin/c/ -Iexternal/libs/bin/cpp/ -Iexternal
+R_CFLAGS += -I. -Iexternal/libs/bin/c/ -Iexternal
 R_BIN_NAME = imagine
 R_BUILD_PATH = $(BUILD_PATH)/release
 R_MAIN_FILE = src/main.cpp
-R_LIBRARIES = external/libs/bin/cpplib.a
+R_LIBRARIES = external/libs/bin/cpp/cpplib.a
 R_OBJECTS = $(patsubst %, $(R_BUILD_PATH)/%.o, $(FILES))
 
 ### Debug settings
@@ -21,7 +21,7 @@ D_CFLAGS = $(R_CFLAGS) -DDEBUG -g
 D_BIN_NAME = debug-imagine
 D_BUILD_PATH = $(BUILD_PATH)/debug
 D_MAIN_FILE = $(R_MAIN_FILE)
-D_LIBRARIES = external/libs/bin/debug-cpplib.a
+D_LIBRARIES = external/libs/bin/cpp/debug-cpplib.a
 D_OBJECTS = $(patsubst %, $(D_BUILD_PATH)/%.o, $(FILES))
 
 ### Test settings
@@ -30,13 +30,18 @@ T_CFLAGS = $(R_CFLAGS) -g -DTESTING -Isrc/ -Iexternal/libs/clib/testbench
 T_BIN_NAME = test-imagine
 T_BUILD_PATH = $(BUILD_PATH)/test
 T_MAIN_FILE = src/testbench/tests.cpp
-T_LIBRARIES = external/libs/bin/debug-cpplib.a
+T_LIBRARIES = external/libs/bin/cpp/debug-cpplib.a
 T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
 
 ### Instructions
 
 # Default
 all: release
+
+libraries:
+	cd external/libs && make clean
+	cd external/libs && make release
+	cd external/libs && make debug 
 
 clean:
 	rm -rfv build
