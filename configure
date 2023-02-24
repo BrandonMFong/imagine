@@ -1,31 +1,24 @@
 #!/usr/bin/bash
 
-result=0;
-
-function installLib() {
-	if [ $result -eq 0 ]; then 
-		git clone https://github.com/BrandonMFong/libs.git external/libs;
-		result=$?;
+if [ ! -d external/libs ]; then
+	git clone https://github.com/BrandonMFong/libs.git external/libs;
+	if [ $? -ne 0 ]; then 
+		echo "Couldn't clone libs";
 	fi
+fi
 
-	if [ $result -eq 0 ]; then 
-		pushd external/libs;
-		make;
-		result=$?;
-		popd;
-	fi
-}
+sudo apt-get install libpng-dev
+if [ $? -ne 0 ]; then 
+	echo "Couldn't install libpng";
+fi
 
-function main() {
+sudo apt-get install libjpeg-dev
+if [ $? -ne 0 ]; then 
+	echo "Couldn't install libjpeg";
+fi
 
-	installLib;
-
-	if [ $result -ne 0 ]; then
-		echo "Error with configure $result";
-	fi
-}
-
-main;
-
-exit $result;
+sudo apt install libtiff5-dev
+if [ $? -ne 0 ]; then 
+	echo "Couldn't install libtiff";
+fi
 

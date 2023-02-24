@@ -4,7 +4,8 @@
 
 ### Global
 BUILD_PATH = build
-FILES = appdriver image png jpeg gif
+FILES = appdriver image png jpeg gif tiff
+CXXLINKS = -lpng -ljpeg -ltiff
 
 ### Release settings
 R_CXXFLAGS += -I. -Iexternal/libs/bin/c/ -Iexternal/libs/bin/cpp/ -Iexternal
@@ -38,11 +39,6 @@ T_OBJECTS = $(patsubst %, $(T_BUILD_PATH)/%.o, $(FILES))
 # Default
 all: release
 
-libraries:
-	cd external/libs && make clean
-	cd external/libs && make release
-	cd external/libs && make debug 
-
 clean:
 	rm -rfv build
 	rm -rfv bin
@@ -55,7 +51,7 @@ release-setup:
 	@mkdir -p bin
 
 bin/$(R_BIN_NAME): $(R_MAIN_FILE) $(R_OBJECTS) $(R_LIBRARIES)
-	g++ -o $@ $^ -lpng -ljpeg $(R_CXXFLAGS)
+	g++ -o $@ $^ $(CXXLINKS) $(R_CXXFLAGS)
 
 $(R_BUILD_PATH)/%.o: src/%.cpp src/%.hpp
 	g++ -c $< -o $@ $(R_CXXFLAGS)
@@ -68,7 +64,7 @@ debug-setup:
 	@mkdir -p bin
 
 bin/$(D_BIN_NAME): $(D_MAIN_FILE) $(D_OBJECTS) $(D_LIBRARIES)
-	g++ -o $@ $^ -lpng -ljpeg $(D_CXXFLAGS)
+	g++ -o $@ $^ $(CXXLINKS) $(D_CXXFLAGS)
 
 $(D_BUILD_PATH)/%.o: src/%.cpp src/%.hpp
 	g++ -c $< -o $@ $(D_CXXFLAGS)
@@ -82,7 +78,7 @@ test-setup:
 	@mkdir -p bin
 
 bin/$(T_BIN_NAME): $(T_MAIN_FILE) $(T_OBJECTS) $(T_LIBRARIES)
-	g++ -o $@ $^ -lpng -ljpeg $(T_CXXFLAGS)
+	g++ -o $@ $^ $(CXXLINKS) $(T_CXXFLAGS)
 
 $(T_BUILD_PATH)/%.o: src/%.cpp src/%.hpp
 	g++ -c $< -o $@ $(T_CXXFLAGS)

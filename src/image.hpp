@@ -77,6 +77,7 @@ protected:
 	virtual int toPNG();
 	virtual int toJPEG();
 	virtual int toGIF();
+	virtual int toTIFF();
 
 	// Prints the color space type as a string
 	const char * colorspaceString();

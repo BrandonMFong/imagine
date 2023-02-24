@@ -25,18 +25,14 @@ const char * const GIF_TYPE_ARG = "gif";
 const char * const OUTPUT_ARG = "-o";
 
 void AppDriver::help() {
-	const char * bin = this->_args->objectAtIndex(0);
-	char buf[PATH_MAX];
-	strcpy(buf, bin);
-	char * name = basename(buf);
-	printf("usage: %s <path> <commands>\n", name);
+	printf("usage: %s <path> <commands>\n", basename((char *) this->_args->objectAtIndex(0)));
 
 	printf("\n");
 
 	// Commands
 	printf("Commands:\n");
-	printf("\t%s: \n", DETAILS_COMMAND);
-	printf("\t%s: \n", AS_COMMAND);
+	printf("\t%s: Prints details for input file\n", DETAILS_COMMAND);
+	printf("\t%s <type> [ %s <output> ]: Converts image to <type>\n", AS_COMMAND, OUTPUT_ARG);
 
 	printf("\n");
 }

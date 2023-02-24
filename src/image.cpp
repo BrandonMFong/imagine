@@ -7,6 +7,7 @@
 #include "png.hpp"
 #include "jpeg.hpp"
 #include "gif.hpp"
+#include "tiff.hpp"
 #include <cpplib.hpp>
 
 extern "C" {
@@ -24,6 +25,8 @@ Image * Image::createImage(const char * path, int * err) {
 		result = new JPEG(path, &error);
 	} else if (GIF::isType(path)) {
 		result = new GIF(path, &error);
+	} else if (Tiff::isType(path)) {
+		result = new Tiff(path, &error);
 	} else {
 		Error("Unsupported file type for path '%s'", path);
 		error = 1;
@@ -45,12 +48,6 @@ Image::~Image() {
 }
 
 int Image::details() {
-	/*
-	printf("Width: %d\n", this->width());
-	printf("Height: %d\n", this->height());
-	printf("Color space: %s\n", this->colorspaceString());
-	printf("Bits per component: %d\n", this->bitsPerComponent());
-	*/
 	Dictionary<String, String> metadata;
 	Dictionary<String, String>::Iterator * itr = 0;
 
@@ -80,6 +77,8 @@ int Image::convertToType(ImageType type) {
 			return this->toJPEG();
 		case kImageTypeGIF:
 			return this->toGIF();
+		case kImageTypeTIFF:
+			return this->toTIFF();
 		default:
 			Error("Unknown type: %d", type);
 			return 1;
@@ -98,6 +97,11 @@ int Image::toJPEG() {
 
 int Image::toGIF() {
 	Error("Cannot convert '%s' image to GIF", this->description());
+	return 1;
+}
+
+int Image::toTIFF() {
+	Error("Cannot convert '%s' image to TIFF", this->description());
 	return 1;
 }
 
