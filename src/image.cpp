@@ -85,26 +85,6 @@ int Image::convertToType(ImageType type) {
 	}
 }
 
-int Image::toPNG() {
-	Error("Cannot convert '%s' image to PNG", this->description());
-	return 1;
-}
-
-int Image::toJPEG() {
-	Error("Cannot convert '%s' image to JPEG", this->description());
-	return 1;
-}
-
-int Image::toGIF() {
-	Error("Cannot convert '%s' image to GIF", this->description());
-	return 1;
-}
-
-int Image::toTIFF() {
-	Error("Cannot convert '%s' image to TIFF", this->description());
-	return 1;
-}
-
 int Image::convertToType(ImageType type, const char * path) {
 	// Saves the path to our reserved buffer
 	if (path) {
@@ -139,5 +119,25 @@ const char * Image::conversionOutputPath() {
 	} else {
 		return this->_imageReserved;
 	}
+}
+
+int Image::toPNG() {
+	Error("Cannot convert '%s' image to PNG", this->description());
+	return 1;
+}
+
+int Image::toJPEG() {
+	Error("Cannot convert '%s' image to JPEG", this->description());
+	return 1;
+}
+
+int Image::toGIF() {
+	Error("Cannot convert '%s' image to GIF", this->description());
+	return 1;
+}
+
+int Image::toTIFF() {
+	Error("Cannot convert '%s' image to TIFF", this->description());
+	return 1;
 }
 

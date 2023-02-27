@@ -14,9 +14,9 @@ extern "C" {
 typedef long ImaginePixels;
 
 typedef enum {
-	kImagineColorSpaceUnknown = 0,
-	kImagineColorSpaceRGB = 1,
-	kImagineColorSpaceRGBA = 2,
+	kImagineColorSpaceUnknown = -1,
+	kImagineColorSpaceRGB = 0,
+	kImagineColorSpaceRGBA = 1,
 } ImagineColorSpace;
 
 class Image : public File {
@@ -38,7 +38,7 @@ public:
 
 	// Tells the Image object to convert to a specific
 	// type of image
-	int convertToType(ImageType type);
+	int convertToType(ImageType type); // this outputs file at relative dir
 	int convertToType(ImageType type, const char * path);
 
 	// Image dimensions in pixels
