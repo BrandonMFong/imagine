@@ -160,17 +160,17 @@ int JPEG::unload() {
 		int result = 0;
 		struct jpeg_decompress_struct * cinfo = (struct jpeg_decompress_struct *) this->_decompressionInfo;
 
-		if (!jpeg_finish_decompress(cinfo)) {
-			result = 1;
-		} else {
-			jpeg_destroy_decompress(cinfo);
-		}
-
-		free(this->_decompressionInfo);
-		this->_decompressionInfo = NULL;
+		// Idk if this will cause any memory leaks but I can't have this running unless
+		// we get a segmentation fault
+		//jpeg_finish_decompress(cinfo);
+		
+		jpeg_destroy_decompress(cinfo);
 
 		// Close the file
 		if (this->_fileHandler) fclose(this->_fileHandler);
+
+		free(this->_decompressionInfo);
+		this->_decompressionInfo = NULL;
 
 		return result;
 	} else {
@@ -178,9 +178,11 @@ int JPEG::unload() {
 	}
 }
 
+/*
 int JPEG::details() {
 	return this->Image::details();
 }
+*/
 
 int JPEG::toPNG() {
 	int result = 0;
@@ -300,10 +302,20 @@ int JPEG::compileMetadata(Dictionary<String, String> * metadata) {
 	//printf("Height: %d\n", this->height());
 	//printf("Color space: %s\n", this->colorspaceString());
 	//printf("Bits per component: %d\n", this->bitsPerComponent());
-	//char buf[0xff];
+	
+	char buf[0xff];
 
-	//sprintf(buf, "%d", this->width());
-	//metadata->setValueForKey("Width", buf);
+	sprintf(buf, "%d", this->width());
+	metadata->setValueForKey("Width", buf);
+
+	sprintf(buf, "%d", this->height());
+	metadata->setValueForKey("Height", buf);
+
+	sprintf(buf, "%s", this->colorspaceString());
+	metadata->setValueForKey("Color space", buf);
+
+	sprintf(buf, "%d", this->bitsPerComponent());
+	metadata->setValueForKey("Bits per component", buf);
 
 	return 0;
 }

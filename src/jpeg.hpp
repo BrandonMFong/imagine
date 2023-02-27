@@ -26,7 +26,7 @@ public:
 	JPEG(const char * path, int * err);
 	virtual ~JPEG();
 
-	int details();
+	//int details();
 	int toPNG();
 	int toJPEG();
 	ImageType type();
