@@ -195,8 +195,9 @@ int JPEG::toPNG() {
 	int number_of_passes = 0;
 	char file_name[PATH_MAX];
 	JSAMPARRAY buffer = NULL; // char **
-
-	sprintf(file_name, "%s/%s.png", this->conversionOutputPath(), this->name());
+	
+	strcpy(file_name, this->conversionOutputPath());
+	sprintf(file_name, "%s/%s.png", file_name, this->name());
 
 	FILE * pngFile = fopen(file_name, "wb");
 	if (!pngFile) {

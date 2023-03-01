@@ -4,7 +4,7 @@
 
 ### Global
 BUILD_PATH = build
-FILES = appdriver image png jpeg gif tiff
+FILES = appdriver image png jpeg gif tiff tiff2png
 CXXLINKS = -lpng -ljpeg -ltiff
 
 ### Release settings

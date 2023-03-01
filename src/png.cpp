@@ -104,8 +104,10 @@ int PNG::toJPEG() {
 	char filename[PATH_MAX];
 	ImagineColorSpace imagineColorSpace = this->colorspace();
 	png_bytep * row_pointers = NULL;
+	
+	strcpy(filename, this->conversionOutputPath());
+	sprintf(filename, "%s/%s.png", filename, this->name());
 
-	sprintf(filename, "%s/%s.jpeg", this->conversionOutputPath(), this->name());
 	if ((outfile = fopen(filename, "wb")) == NULL) {
 		Error("Could not open file %s", filename);
 		result = 1;

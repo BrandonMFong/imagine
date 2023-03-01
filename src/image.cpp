@@ -40,6 +40,8 @@ Image * Image::createImage(const char * path, int * err) {
 Image::Image(const char * path, int * err) : File(path, err) {
 	int error = err ? *err : 1;
 
+	this->_imageReserved[0] = '\0';
+
 	if (err) *err = error;
 }
 
@@ -113,7 +115,7 @@ const char * Image::colorspaceString() {
 const char * Image::conversionOutputPath() {
 	// If we don't have a string, then we will 
 	// return our directory
-	if (!strlen(this->_imageReserved)) {
+	if (strlen(this->_imageReserved) == 0) {
 		strcpy(this->_imageReserved, this->directory());
 		return this->_imageReserved;
 	} else {
