@@ -6,7 +6,7 @@
 #include "tiff.hpp"
 #include <fcntl.h>
 #include <unistd.h>
-#include <cpplib.hpp>
+#include <bflibcpp/bflibcpp.hpp>
 
 extern "C" {
 #include <png.h>
@@ -103,7 +103,7 @@ static jmpbuf_wrapper tiff2png_jmpbuf_struct;
 
 void tiff2png_error_handler (png_structp png_ptr, png_const_charp msg) {
 	jmpbuf_wrapper  *jmpbuf_ptr;
-	DLog("tiff2png:  fatal libpng error: %s\n", msg);
+	BFDLog("tiff2png:  fatal libpng error: %s\n", msg);
 	longjmp (jmpbuf_ptr->jmpbuf, 1);
 }
 
@@ -190,7 +190,7 @@ int tiff2png(
 	if (result == 0) {
 		png = fopen (pngname, "wb");
 		if (png == NULL) {
-			DLog("tiff2png error:  PNG file %s cannot be created", pngname);
+			BFDLog("tiff2png error:  PNG file %s cannot be created", pngname);
 			result = 1;
 		}
 	}
@@ -201,7 +201,7 @@ int tiff2png(
 		png_ptr = png_create_write_struct (PNG_LIBPNG_VER_STRING,
 		&tiff2png_jmpbuf_struct, tiff2png_error_handler, NULL);
 		if (!png_ptr) {
-			DLog("tiff2png error:  cannot allocate libpng main struct (%s)\n", pngname);
+			BFDLog("tiff2png error:  cannot allocate libpng main struct (%s)\n", pngname);
 			result = 4;
 		}
 	}
@@ -209,14 +209,14 @@ int tiff2png(
 	if (result == 0) {
 		info_ptr = png_create_info_struct(png_ptr);
 		if (!info_ptr) {
-			DLog("tiff2png error:  cannot allocate libpng info struct (%s)\n", pngname);
+			BFDLog("tiff2png error:  cannot allocate libpng info struct (%s)\n", pngname);
 			result = 4;
 		}
 	}
 
 	if (result == 0) {
 		if (setjmp (tiff2png_jmpbuf_struct.jmpbuf)) {
-			DLog("tiff2png error:  libpng returns error condition (%s)\n", pngname);
+			BFDLog("tiff2png error:  libpng returns error condition (%s)\n", pngname);
 			result = 1;
 		} else {
 			png_init_io (png_ptr, png);
@@ -227,7 +227,7 @@ int tiff2png(
 
 	if (result == 0) {
 		if (! TIFFGetField (tif, TIFFTAG_PHOTOMETRIC, &photometric)) {
-			DLog("tiff2png error:  photometric could not be retrieved (%s)\n", tiffname);
+			BFDLog("tiff2png error:  photometric could not be retrieved (%s)\n", tiffname);
 			result = 1;
 		}
 	}
@@ -311,14 +311,14 @@ int tiff2png(
 			color_type = PNG_COLOR_TYPE_PALETTE;
 
 			if (!TIFFGetField(tif, TIFFTAG_COLORMAP, &redcolormap, &greencolormap, &bluecolormap)) {
-				DLog("tiff2png error:  cannot retrieve TIFF colormaps (%s)\n", tiffname);
+				BFDLog("tiff2png error:  cannot retrieve TIFF colormaps (%s)\n", tiffname);
 				result = 1;
 			}
 
 			if (result == 0) {
 				colors = maxval + 1;
 				if (colors > MAXCOLORS) {
-					DLog("tiff2png error:  palette too large (%d colors) (%s)\n", colors, tiffname);
+					BFDLog("tiff2png error:  palette too large (%d colors) (%s)\n", colors, tiffname);
 					result = 1;
 				}
 			}
@@ -382,7 +382,7 @@ int tiff2png(
 				TIFFSetField(tif, TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
 				photometric = PHOTOMETRIC_RGB;
 			} else {
-				DLog(
+				BFDLog(
 				"tiff2png error:  don't know how to handle PHOTOMETRIC_YCBCR with\n"
 				"  compression %d (%sJPEG) and planar config %d (%scontiguous)\n"
 				"  (%s)\n", tiff_compression_method,
@@ -408,7 +408,7 @@ int tiff2png(
 			/* GRR 20001110:  lifted from tiff2ps from libtiff 3.5.4 */
 			TIFFGetField(tif, TIFFTAG_COMPRESSION, &tiff_compression_method);
 			if (tiff_compression_method != COMPRESSION_SGILOG && tiff_compression_method != COMPRESSION_SGILOG24) {
-				DLog(
+				BFDLog(
 				"tiff2png error:  don't know how to handle PHOTOMETRIC_LOGL%s with\n"
 				"  compression %d (not SGILOG) (%s)\n",
 				photometric == PHOTOMETRIC_LOGLUV? "UV" : "",
@@ -450,7 +450,7 @@ int tiff2png(
 		case PHOTOMETRIC_SEPARATED:
 		case PHOTOMETRIC_CIELAB:
 		case PHOTOMETRIC_DEPTH:
-			DLog(
+			BFDLog(
 			"tiff2png error:  don't know how to handle %s (%s)\n",
 			/*
 			photometric == PHOTOMETRIC_YCBCR?     "PHOTOMETRIC_YCBCR" :
@@ -466,7 +466,7 @@ int tiff2png(
 			result = 1;
 
 		default:
-			DLog("tiff2png error:  unknown photometric (%d) (%s)\n",
+			BFDLog("tiff2png error:  unknown photometric (%d) (%s)\n",
 			photometric, tiffname);
 			result = 1;
 		}
@@ -477,13 +477,13 @@ int tiff2png(
 
 		faxpect = faxpect_option;
 		if (faxpect && (!have_res || ratio < 1.90 || ratio > 2.10)) {
-			DLog(
+			BFDLog(
 			"tiff2png:  aspect ratio is out of range: skipping -faxpect conversion\n");
 			faxpect = FALSE;
 		}
 
 		if (faxpect && (color_type != PNG_COLOR_TYPE_GRAY || bit_depth != 1)) {
-			DLog(
+			BFDLog(
 			"tiff2png:  only B&W (1-bit grayscale) images supported for -faxpect\n");
 			faxpect = FALSE;
 		}
@@ -547,7 +547,7 @@ int tiff2png(
 				tilesz = TIFFTileSize(tif);
 				tifftile = (uch*) malloc(tilesz);
 				if (tifftile == NULL) {
-					DLog(
+					BFDLog(
 					"tiff2png error:  can't allocate memory for TIFF tile buffer (%s)\n",
 					tiffname);
 					result = 4;
@@ -558,7 +558,7 @@ int tiff2png(
 							 * we'll move it through below. */
 				}
 			} else {
-				DLog(
+				BFDLog(
 				"tiff2png error: can't handle tiled separated-plane TIFF format (%s)\n",
 				tiffname);
 				result = 5;
@@ -568,7 +568,7 @@ int tiff2png(
 
 	if (result == 0) {
 		if (tiffline == NULL) {
-			DLog(
+			BFDLog(
 			"tiff2png error:  can't allocate memory for TIFF scanline buffer (%s)\n",
 			tiffname);
 			if (tiled && planar == 1) free(tifftile);
@@ -580,7 +580,7 @@ int tiff2png(
 		if (planar != 1) /* in case we must combine more planes into one */ {
 			tiffstrip = (uch*) malloc(TIFFScanlineSize(tif));
 			if (tiffstrip == NULL) {
-				DLog(
+				BFDLog(
 				"tiff2png error:  can't allocate memory for TIFF strip buffer (%s)\n",
 				tiffname);
 				free(tiffline);
@@ -595,7 +595,7 @@ int tiff2png(
 	if (result == 0) {
 		pngline = (uch *) malloc (cols * 8);
 		if (pngline == NULL) {
-			DLog(
+			BFDLog(
 			"tiff2png error:  can't allocate memory for PNG row buffer (%s)\n",
 			tiffname);
 			free(tiffline);
@@ -619,7 +619,7 @@ int tiff2png(
 					if (planar == 1) /* contiguous picture */ {
 						if (!tiled) {
 							if (TIFFReadScanline (tif, tiffline, row, 0) < 0) {
-								DLog("tiff2png error:  bad data read on line %d (%s)\n",
+								BFDLog("tiff2png error:  bad data read on line %d (%s)\n",
 								row, tiffname);
 								free(tiffline);
 								result = 1;
@@ -672,7 +672,7 @@ int tiff2png(
 							putbitsleft = 8;
 
 							if (TIFFReadScanline(tif, tiffstrip, row, s) < 0) {
-								DLog("tiff2png error:  bad data read on line %d (%s)\n",
+								BFDLog("tiff2png error:  bad data read on line %d (%s)\n",
 								row, tiffname);
 								free(tiffline);
 								free(tiffstrip);
@@ -927,7 +927,7 @@ int tiff2png(
 						break;
 
 					default:
-						DLog("tiff2png error:  unknown photometric (%d) (%s)\n",
+						BFDLog("tiff2png error:  unknown photometric (%d) (%s)\n",
 						photometric, tiffname);
 						free(tiffline);
 						if (tiled && planar == 1)
@@ -940,12 +940,12 @@ int tiff2png(
 				if (result == 0) {
 #ifdef GRR_16BIT_DEBUG
 					if (bps == 16 && row == 0) {
-						DLog("DEBUG:  hex contents of first row sent to libpng:\n");
+						BFDLog("DEBUG:  hex contents of first row sent to libpng:\n");
 						p_png = pngline;
 						for (col = cols; col > 0; --col, p_png += 2)
-							DLog("   %02x %02x", p_png[0], p_png[1]);
-						DLog("\n");
-						DLog("DEBUG:  end of first row sent to libpng\n");
+							BFDLog("   %02x %02x", p_png[0], p_png[1]);
+						BFDLog("\n");
+						BFDLog("DEBUG:  end of first row sent to libpng\n");
 					}
 #endif
 					png_write_row(png_ptr, pngline);
@@ -967,11 +967,11 @@ int tiff2png(
 
 #ifdef GRR_16BIT_DEBUG
 	if (bps == 16) {
-		DLog("tiff2png:  range of most significant bytes  = %u-%u\n",
+		BFDLog("tiff2png:  range of most significant bytes  = %u-%u\n",
 		msb_min, msb_max);
-		DLog("tiff2png:  range of least significant bytes = %u-%u\n",
+		BFDLog("tiff2png:  range of least significant bytes = %u-%u\n",
 		lsb_min, lsb_max);
-		DLog("tiff2png:  range of 16-bit integer values   = %u-%u\n",
+		BFDLog("tiff2png:  range of 16-bit integer values   = %u-%u\n",
 		s16_min, s16_max);
 	}
 #endif

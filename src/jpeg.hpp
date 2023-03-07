@@ -37,7 +37,7 @@ public:
 	ImagineColorSpace colorspace();
 	int bitsPerComponent();
 	const char * description();
-	int compileMetadata(Dictionary<String, String> * metadata);
+	int compileMetadata(BF::Dictionary<BF::String, BF::String> * metadata);
 
 private:
 	// Holds the jpeg decompressed data

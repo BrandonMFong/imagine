@@ -6,7 +6,7 @@
 #ifndef APPDRIVER_HPP
 #define APPDRIVER_HPP
 
-#include <array.hpp>
+#include <bflibcpp/array.hpp>
 
 class Image;
 
@@ -18,12 +18,12 @@ public:
 	int run();
 	void help();
 
-	const Array<const char *> * args();
+	const BF::Array<const char *> * args();
 
 private:
 	int handleAsCommand(Image * img);
 	int handleDetailsCommand(Image * img);
-	Array<const char *> * _args;
+	BF::Array<const char *> * _args;
 };
 
 #endif // APPDRIVER_HPP

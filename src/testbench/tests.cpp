@@ -8,7 +8,7 @@
 #include <jpeg.hpp>
 #include <image.hpp>
 #include <appdriver.hpp>
-#include <cpplib.hpp>
+#include <bflibcpp/bflibcpp.hpp>
 #include <cpplib_tests.hpp>
 
 extern "C" {

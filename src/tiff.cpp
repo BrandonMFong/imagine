@@ -6,16 +6,18 @@
 #include "tiff.hpp"
 #include <fcntl.h>
 #include <unistd.h>
-#include <cpplib.hpp>
+#include <bflibcpp/bflibcpp.hpp>
 
 extern "C" {
 #include <png.h>
 #include <tiff.h>
 }
 
+using namespace BF;
+
 bool Tiff::isType(const char * path) {
 	char buf[10];
-	int error = GetFileExtensionForPath(path, buf);
+	int error = BFFileSystemPathGetExtension(path, buf);
 
 	return (error == 0) && !strcmp(buf, "tif");
 }

@@ -5,7 +5,7 @@
 #include "imagetypes.h"
 #include "image.hpp"
 #include <tiffio.h>
-#include "accessorspecifiers.hpp"
+#include <bflibcpp/accessorspecifiers.hpp>
 
 /**
  *  Good documentation here: https://github.com/vadz/libtiff/tree/master/libtiff
@@ -23,7 +23,7 @@ PUBLIC:
 	ImagineColorSpace colorspace();
 	int load();
 	int unload();
-	int compileMetadata(Dictionary<String, String> * metadata);
+	int compileMetadata(BF::Dictionary<BF::String, BF::String> * metadata);
 	ImageType type();
 	const char * description();
 

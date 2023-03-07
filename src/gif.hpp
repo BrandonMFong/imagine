@@ -7,7 +7,7 @@
 #define GIF_HPP
 
 #include "image.hpp"
-#include "list.hpp"
+#include <bflibcpp/list.hpp>
 
 /**
  *
@@ -166,7 +166,7 @@ private:
 	/**
 	 * Finds all the image data from fs' current stream position and adds them to idList
 	 */	
-	static int readImageData(List<ImageData *> * idList, FILE * fs, const ColorTable * colorTableGlobal);
+	static int readImageData(BF::List<ImageData *> * idList, FILE * fs, const ColorTable * colorTableGlobal);
 
 	int readBlocks();
 
@@ -202,7 +202,7 @@ private:
 	/**
 	 * Holds all image data
 	 */
-	List<ImageData *> _imageData;
+	BF::List<ImageData *> _imageData;
 
 // required 
 public:
@@ -215,7 +215,7 @@ public:
 	ImageType type();
 	int toGIF();
 	const char * description();
-	int compileMetadata(Dictionary<String, String> * metadata);
+	int compileMetadata(BF::Dictionary<BF::String, BF::String> * metadata);
 };
 
 #endif // GIF_HPP

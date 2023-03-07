@@ -6,8 +6,10 @@
 #include "appdriver.hpp"
 #include <string.h>
 #include "image.hpp"
-#include <cpplib.hpp>
+#include <bflibcpp/bflibcpp.hpp>
 #include <libgen.h>
+
+using namespace BF;
 
 // Shared instance varaible
 AppDriver * APP_DRIVER = 0;
@@ -79,7 +81,7 @@ int AppDriver::run() {
 		} else if (this->_args->contains((char *) DETAILS_COMMAND)) {
 			result = this->handleDetailsCommand(img);
 		} else {
-			Error("No known commands");
+			BFErrorPrint("No known commands");
 			result = 1;
 		}
 	}
@@ -101,7 +103,7 @@ int AppDriver::handleAsCommand(Image * img) {
 	const char * outputPath = NULL;
 
 	if ((arg = this->_args->objectAtIndex(index+1)) == NULL) {
-		Error("Could not get arg at index %d", index+1);
+		BFErrorPrint("Could not get arg at index %d", index+1);
 		result = 1;
 	}
 
@@ -114,7 +116,7 @@ int AppDriver::handleAsCommand(Image * img) {
 			type = kImageTypeGIF;
 		} else {
 			result = 3;
-			Error("Unknown type '%s'", arg);
+			BFErrorPrint("Unknown type '%s'", arg);
 		}
 	}
 
@@ -123,7 +125,7 @@ int AppDriver::handleAsCommand(Image * img) {
 			index = this->_args->indexForObject((char *) OUTPUT_ARG);
 
 			if ((outputPath = this->_args->objectAtIndex(index+1)) == NULL) {
-				Error("Could not get arg at index %d", index+1);
+				BFErrorPrint("Could not get arg at index %d", index+1);
 				result = 4;
 			}
 		}
@@ -131,11 +133,11 @@ int AppDriver::handleAsCommand(Image * img) {
 
 	if (result == 0) {
 		if (result = img->load()) {
-			Error("loading: %d", result);
+			BFErrorPrint("loading: %d", result);
 		} else if (result = img->convertToType(type, outputPath)) {
-			Error("converting to type %d: %d", type, result);
+			BFErrorPrint("converting to type %d: %d", type, result);
 		} else if (result = img->unload()) {
-			Error("unloading: %d", result);
+			BFErrorPrint("unloading: %d", result);
 		}
 	}
 

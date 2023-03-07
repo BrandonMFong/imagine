@@ -6,7 +6,7 @@
  */
 
 #include "jpeg.hpp"
-#include <cpplib.hpp>
+#include <bflibcpp/bflibcpp.hpp>
 
 extern "C" {
 #include <string.h>
@@ -18,12 +18,14 @@ extern "C" {
 #include <png.h>
 }
 
+using namespace BF;
+
 const int FILE_EXTENSION_ARRAY_SIZE = 3;
 const char * const FILE_EXTENSION_ARRAY[] = {"jpeg", "jpg", "JPG"};
 
 bool JPEG::isType(const char * path) {
 	char buf[10];
-	int error = GetFileExtensionForPath(path, buf);
+	int error = BFFileSystemPathGetExtension(path, buf);
 
 	if (error == 0) {
 		for (int i = 0; i < FILE_EXTENSION_ARRAY_SIZE; i++) {
@@ -112,7 +114,7 @@ int JPEG::load() {
 
 	// Open the file
 	if ((this->_fileHandler = fopen(this->path(), "rb")) == NULL) {
-		Error("can't open %s\n", this->path());
+		BFErrorPrint("can't open %s\n", this->path());
 		result = 1;
 	}
 
@@ -131,7 +133,7 @@ int JPEG::load() {
 		jpeg_stdio_src(cinfo, this->_fileHandler);
 		if (jpeg_read_header(cinfo, true) != JPEG_HEADER_OK) {
 			result = 3;
-			Error("Error reading header");
+			BFErrorPrint("Error reading header");
 		}
 	}
 
@@ -140,7 +142,7 @@ int JPEG::load() {
 		cinfo->out_color_space = JCS_RGB;
 		if (!jpeg_start_decompress(cinfo)) {
 			result = 4;
-			Error("Error decompressing");
+			BFErrorPrint("Error decompressing");
 		}
 	}
 
@@ -148,8 +150,8 @@ int JPEG::load() {
 	if (result == 0) {
 		this->_decompressionInfo = cinfo;
 	} else {
-		Error("Error loading image '%s': %d", this->path(), result);
-		Free(cinfo);
+		BFErrorPrint("Error loading image '%s': %d", this->path(), result);
+		BFFree(cinfo);
 	}
 
 	return result;
@@ -169,7 +171,7 @@ int JPEG::unload() {
 		// Close the file
 		if (this->_fileHandler) fclose(this->_fileHandler);
 
-		free(this->_decompressionInfo);
+		BFFree(this->_decompressionInfo);
 		this->_decompressionInfo = NULL;
 
 		return result;
@@ -201,7 +203,7 @@ int JPEG::toPNG() {
 
 	FILE * pngFile = fopen(file_name, "wb");
 	if (!pngFile) {
-		Error("[write_png_file] File %s could not be opened for writing", file_name);
+		BFErrorPrint("[write_png_file] File %s could not be opened for writing", file_name);
 		result = 1;
 	}
 
@@ -209,7 +211,7 @@ int JPEG::toPNG() {
 		png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
 		if (!png_ptr) {
-			Error("Could not create png struct");
+			BFErrorPrint("Could not create png struct");
 			result = 2;
 		}
 	}
@@ -217,14 +219,14 @@ int JPEG::toPNG() {
 	if (result == 0) {	
 		info_ptr = png_create_info_struct(png_ptr);
 		if (!info_ptr) {
-			Error("[write_png_file] png_create_info_struct failed");
+			BFErrorPrint("[write_png_file] png_create_info_struct failed");
 			result = 3;
 		}
 	}
 
 	if (result == 0) {
 		if (setjmp(png_jmpbuf(png_ptr))) {
-			Error("[write_png_file] Error during init_io");
+			BFErrorPrint("[write_png_file] Error during init_io");
 			result = 4;
 		}
 	}
@@ -233,7 +235,7 @@ int JPEG::toPNG() {
 		png_init_io(png_ptr, pngFile);
 
 		if (setjmp(png_jmpbuf(png_ptr))) {
-			Error("[write_png_file] Error during writing header");
+			BFErrorPrint("[write_png_file] Error during writing header");
 			result = 5;
 		}
 	}
@@ -254,7 +256,7 @@ int JPEG::toPNG() {
 		png_write_info(png_ptr, info_ptr);
 
 		if (setjmp(png_jmpbuf(png_ptr))) {
-			Error("[write_png_file] Error during writing bytes");
+			BFErrorPrint("[write_png_file] Error during writing bytes");
 			result = 6;
 		}
 	}
@@ -265,7 +267,7 @@ int JPEG::toPNG() {
 		buffer = (*cinfo->mem->alloc_sarray)((j_common_ptr) cinfo, JPOOL_IMAGE, row_stride, 1);
 
 		if (!buffer) {
-			Error("Could not create buffer");
+			BFErrorPrint("Could not create buffer");
 			result = 7;
 		}
 	}
@@ -277,7 +279,7 @@ int JPEG::toPNG() {
 		}
 
 		if (setjmp(png_jmpbuf(png_ptr))) {
-			Error("[write_png_file] Error during end of write");
+			BFErrorPrint("[write_png_file] Error during end of write");
 			result = 8;
 		}
 
@@ -290,7 +292,7 @@ int JPEG::toPNG() {
 }
 
 int JPEG::toJPEG() {
-	Error("File '%s' is already a jpeg file", this->path());
+	BFErrorPrint("File '%s' is already a jpeg file", this->path());
 	return 1;
 }
 

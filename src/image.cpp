@@ -8,12 +8,14 @@
 #include "jpeg.hpp"
 #include "gif.hpp"
 #include "tiff.hpp"
-#include <cpplib.hpp>
+#include <bflibcpp/bflibcpp.hpp>
 
 extern "C" {
 #include <string.h>
 #include <libgen.h>
 }
+
+using namespace BF;
 
 Image * Image::createImage(const char * path, int * err) {
 	Image * result = 0;
@@ -28,7 +30,7 @@ Image * Image::createImage(const char * path, int * err) {
 	} else if (Tiff::isType(path)) {
 		result = new Tiff(path, &error);
 	} else {
-		Error("Unsupported file type for path '%s'", path);
+		BFErrorPrint("Unsupported file type for path '%s'", path);
 		error = 1;
 	}
 
@@ -82,7 +84,7 @@ int Image::convertToType(ImageType type) {
 		case kImageTypeTIFF:
 			return this->toTIFF();
 		default:
-			Error("Unknown type: %d", type);
+			BFErrorPrint("Unknown type: %d", type);
 			return 1;
 	}
 }
@@ -91,7 +93,7 @@ int Image::convertToType(ImageType type, const char * path) {
 	// Saves the path to our reserved buffer
 	if (path) {
 		if (!realpath(path, this->_imageReserved)) {
-			Error("Error with finding real path for %s", path);
+			BFErrorPrint("Error with finding real path for %s", path);
 			strcpy(this->_imageReserved, "");
 		}
 	} else {
@@ -124,22 +126,22 @@ const char * Image::conversionOutputPath() {
 }
 
 int Image::toPNG() {
-	Error("Cannot convert '%s' image to PNG", this->description());
+	BFErrorPrint("Cannot convert '%s' image to PNG", this->description());
 	return 1;
 }
 
 int Image::toJPEG() {
-	Error("Cannot convert '%s' image to JPEG", this->description());
+	BFErrorPrint("Cannot convert '%s' image to JPEG", this->description());
 	return 1;
 }
 
 int Image::toGIF() {
-	Error("Cannot convert '%s' image to GIF", this->description());
+	BFErrorPrint("Cannot convert '%s' image to GIF", this->description());
 	return 1;
 }
 
 int Image::toTIFF() {
-	Error("Cannot convert '%s' image to TIFF", this->description());
+	BFErrorPrint("Cannot convert '%s' image to TIFF", this->description());
 	return 1;
 }
 

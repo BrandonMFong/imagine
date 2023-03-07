@@ -1,14 +1,19 @@
+/**
+ * author: Brando
+ * 7/22/22
+ */
 
 #ifndef IMAGE_H
 #define IMAGE_H
 
 #include "imagetypes.h"
-#include "file.hpp"
-#include <dictionary.hpp>
-#include <string.hpp>
+#include <bflibcpp/file.hpp>
+#include <bflibcpp/dictionary.hpp>
+#include <bflibcpp/string.hpp>
+#include <linux/limits.h>
 
 extern "C" {
-#include <filesystem.h>
+#include <bflibc/filesystem.h>
 }
 
 typedef long ImaginePixels;
@@ -19,7 +24,7 @@ typedef enum {
 	kImagineColorSpaceRGBA = 1,
 } ImagineColorSpace;
 
-class Image : public File {
+class Image : public BF::File {
 public:
 	/**
 	 * Creates an image object 
@@ -58,7 +63,7 @@ public:
 	 *
 	 * param `metadata`: output dictionary that will have metadata
 	 */
-	virtual int compileMetadata(Dictionary<String, String> * metadata) = 0;
+	virtual int compileMetadata(BF::Dictionary<BF::String, BF::String> * metadata) = 0;
 
 protected:
 	Image(const char * path, int * err);

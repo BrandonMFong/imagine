@@ -4,7 +4,7 @@
  */
 
 #include "png.hpp"
-#include <cpplib.hpp>
+#include <bflibcpp/bflibcpp.hpp>
 #include <rapidxml/rapidxml.hpp>
 #include "jpeg.hpp"
 
@@ -15,11 +15,12 @@ extern "C" {
 #include <jpeglib.h>
 }
 
+using namespace BF;
 using namespace rapidxml;
 
 bool PNG::isType(const char * path) {
 	char buf[10];
-	int error = GetFileExtensionForPath(path, buf);
+	int error = BFFileSystemPathGetExtension(path, buf);
 	
 	bool result = false;
 
@@ -80,7 +81,7 @@ ImagineColorSpace PNG::colorspace() {
 }
 
 int PNG::toPNG() {
-	Error("Path %s is already a PNG file!", this->path());
+	BFErrorPrint("Path %s is already a PNG file!", this->path());
 	return 1;
 }
 
@@ -109,7 +110,7 @@ int PNG::toJPEG() {
 	sprintf(filename, "%s/%s.png", filename, this->name());
 
 	if ((outfile = fopen(filename, "wb")) == NULL) {
-		Error("Could not open file %s", filename);
+		BFErrorPrint("Could not open file %s", filename);
 		result = 1;
 	}
 
@@ -138,7 +139,7 @@ int PNG::toJPEG() {
 	
 		/* read file */
         png_read_update_info((png_structp) this->_pngStruct, (png_infop) this->_pngInfo);
-        if (setjmp(png_jmpbuf((png_structp) this->_pngStruct))) Error("error with png_jmpbuf");
+        if (setjmp(png_jmpbuf((png_structp) this->_pngStruct))) BFErrorPrint("error with png_jmpbuf");
 
 		int height = png_get_image_height((png_structp) this->_pngStruct, (png_infop) this->_pngInfo);
         row_pointers = (png_bytep*) malloc(sizeof(png_bytep) * height);
@@ -196,7 +197,7 @@ int PNG::load() {
 		png_uint_32 count = png_get_text(png, info, &text, NULL);
 		for (int i = 0; i < count; i++) {
 			if (!strcmp(text->key, "XML:com.adobe.xmp")) {
-				xmpData = CopyString(text->text, &result);
+				xmpData = BFStringCopyString(text->text, &result);
 			}
 
 			if (result) break;

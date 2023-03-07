@@ -4,7 +4,7 @@
  */
 
 #include "gif.hpp"
-#include <cpplib.hpp>
+#include <bflibcpp/bflibcpp.hpp>
 
 extern "C" {
 #include <string.h>
@@ -12,17 +12,19 @@ extern "C" {
 #include <math.h>
 }
 
+using namespace BF;
+
 const char * const GIF_FILE_SIGNATURE = "GIF";
 const int FILE_EXTENSION_ARRAY_SIZE = 1;
 const char * const FILE_EXTENSION_ARRAY[] = {"gif"};
 
 void GIF::imageDataFree(ImageData * obj) {
-	Free(obj);
+	BFFree(obj);
 }
 
 bool GIF::isType(const char * path) {
 	char buf[10];
-	if (!GetFileExtensionForPath(path, buf)) {
+	if (!BFFileSystemPathGetExtension(path, buf)) {
 		for (int i = 0; i < FILE_EXTENSION_ARRAY_SIZE; i++) {
 			if (!strcmp(buf, FILE_EXTENSION_ARRAY[i])) return true;
 		}
@@ -53,7 +55,7 @@ int GIF::load() {
 	int result = 0;
 	
 	if ((this->_fileHandler = fopen(this->path(), "rb")) == NULL) {
-		Error("Could not open file '%s' for reading", this->path());
+		BFErrorPrint("Could not open file '%s' for reading", this->path());
 		result = 1;
 	}
 
@@ -63,7 +65,7 @@ int GIF::load() {
 		size_t rsize = fread(&this->_header, 1, headerSize, this->_fileHandler);
 
 		if (rsize != headerSize) {
-			Error("Could not read the header properly, we read %d when we should have read %d\n", rsize, headerSize);
+			BFErrorPrint("Could not read the header properly, we read %d when we should have read %d\n", rsize, headerSize);
 			result = 1;
 		}
 	}
@@ -78,7 +80,7 @@ int GIF::load() {
 		}
 		
 		if (result) {
-			Error("Gif file signature should be '%s', but instead we have %c%c%c", 
+			BFErrorPrint("Gif file signature should be '%s', but instead we have %c%c%c", 
 					GIF_FILE_SIGNATURE, 
 					this->_header.signature[0], 
 					this->_header.signature[1], 
@@ -106,13 +108,13 @@ int GIF::colorTableRead(FILE * fs, ColorTable * table, size_t pixelSize) {
 	int result = 0;
 	
 	if ((table->red = (unsigned char *) malloc(pixelSize)) == NULL) {
-		Error("Allocating red");
+		BFErrorPrint("Allocating red");
 		result = 1;
 	} else if ((table->green = (unsigned char *) malloc(pixelSize)) == NULL) {
-		Error("Allocating green");
+		BFErrorPrint("Allocating green");
 		result = 2;
 	} else if ((table->blue = (unsigned char *) malloc(pixelSize)) == NULL) {
-		Error("Allocating blue");
+		BFErrorPrint("Allocating blue");
 		result = 3;
 	} else {
 		table->size = pixelSize;
@@ -122,7 +124,7 @@ int GIF::colorTableRead(FILE * fs, ColorTable * table, size_t pixelSize) {
 
 			if (rsize != 3) {
 				result = 1;
-				Error("Did not read expected size for global color table");
+				BFErrorPrint("Did not read expected size for global color table");
 				break;
 			} else {
 				table->red[i] = buf[0];
@@ -153,7 +155,7 @@ int GIF::readImageData(List<ImageData *> * idList, FILE * fs, const ColorTable *
 			rsize = fread(&img->descriptor, 1, size, fs);
 
 			if (size != rsize) {
-				Error("Could not read img descriptor");
+				BFErrorPrint("Could not read img descriptor");
 				result = 1;
 
 			// Should I assume there are no more images
@@ -164,7 +166,7 @@ int GIF::readImageData(List<ImageData *> * idList, FILE * fs, const ColorTable *
 				fseek(fs, -1 * size, SEEK_CUR);
 
 				// Free unused memory
-				Free(img);
+				BFFree(img);
 			}
 		}
 
@@ -184,7 +186,7 @@ int GIF::readImageData(List<ImageData *> * idList, FILE * fs, const ColorTable *
 				}
 
 				if (result) {
-					Error("Reading color table, %d", result);
+					BFErrorPrint("Reading color table, %d", result);
 				}
 			}
 
@@ -192,7 +194,7 @@ int GIF::readImageData(List<ImageData *> * idList, FILE * fs, const ColorTable *
 			if (result == 0) {
 				rsize = fread(&img->table.lzwMinimumCodeSize, 1, 1, fs);
 				if (rsize != 1) {
-					Error("Reading LZW alg data");
+					BFErrorPrint("Reading LZW alg data");
 					result = 5;
 				}
 			}
@@ -228,7 +230,7 @@ int GIF::readSubBlockSequence(FILE * fs, DataBlock * dataSequence) {
 		result = GIF::readSubBlocks(fs, &subBlock);
 		
 		if (result) {
-			Error("Reading image data: %d", result);
+			BFErrorPrint("Reading image data: %d", result);
 		} 
 		
 		// see if we have a block terminator
@@ -236,7 +238,7 @@ int GIF::readSubBlockSequence(FILE * fs, DataBlock * dataSequence) {
 			char t;
 			rsize = fread(&t, 1, 1, fs);
 			if (rsize != 1) {
-				Error("Could not read");
+				BFErrorPrint("Could not read");
 				result = 8;
 			} else if (t == blockTerm) {
 				// End sequence
@@ -251,11 +253,11 @@ int GIF::readSubBlockSequence(FILE * fs, DataBlock * dataSequence) {
 			dataSequence->size += subBlock.size;
 			if ((dataSequence->buf = (unsigned char *) realloc(dataSequence->buf, dataSequence->size)) == NULL) {
 				result = 10;
-				Error("Could not get more bytes for buffer");
+				BFErrorPrint("Could not get more bytes for buffer");
 			} else {
 				if (memcpy(dataSequence->buf + offset, subBlock.buf, subBlock.size) == NULL) {
 					result = 11;
-					Error("Could not copy subblock data");
+					BFErrorPrint("Could not copy subblock data");
 				}
 			}
 		}
@@ -273,7 +275,7 @@ int GIF::readSubBlocks(FILE * fs, DataBlock * subBlock) {
 		rsize = fread(&subBlock->size, 1, 1, fs);
 		
 		if (rsize != 1) {
-			Error("Reading sub block size");
+			BFErrorPrint("Reading sub block size");
 			result = 6;
 		}
 	}
@@ -283,14 +285,14 @@ int GIF::readSubBlocks(FILE * fs, DataBlock * subBlock) {
 		size_t size = subBlock->size;
 		if (size > 0) {
 			if ((subBlock->buf = (unsigned char *) malloc(size)) == NULL) {
-				Error("Allocating memory size %d\n", size);
+				BFErrorPrint("Allocating memory size %d\n", size);
 				result = 7;
 			} else {
 				rsize = fread(subBlock->buf, 1, size, fs);
 
 				if (rsize != size) {
-					Error("Could not read raw data of size %d (%x)", size, size);
-					Error("Read size for data was %d", rsize);
+					BFErrorPrint("Could not read raw data of size %d (%x)", size, size);
+					BFErrorPrint("Read size for data was %d", rsize);
 					result = 8;
 				}
 			}
@@ -327,7 +329,7 @@ int GIF::readBlocks() {
 			} else if (buf == extIntro) {
 				if (fread(&buf, 1, 1, this->_fileHandler) != 1) {
 					result = 1;
-					Error("Reading the label error");
+					BFErrorPrint("Reading the label error");
 				} else {
 					// Graphics
 					if (buf == this->_extGraphics.label) {
@@ -338,7 +340,7 @@ int GIF::readBlocks() {
 							result = 1;
 						} else if (this->_extGraphics.term != 0x00) {
 							result = 1;
-							Error("Terminator is incorrect: 0x%x", this->_extGraphics.term);
+							BFErrorPrint("Terminator is incorrect: 0x%x", this->_extGraphics.term);
 						}
 
 					// Comments
@@ -346,13 +348,13 @@ int GIF::readBlocks() {
 						result = GIF::readSubBlocks(this->_fileHandler, &this->_extComments.subBlock);
 
 						if (result) {
-							Error("Sub block error: %d", result);
+							BFErrorPrint("Sub block error: %d", result);
 						} else if (!fread(&this->_extComments.term, 1, 1, this->_fileHandler)) {
 							result = 8;
-							Error("Terminator data could not be read");
+							BFErrorPrint("Terminator data could not be read");
 						} else if (this->_extComments.term != 0x00) {
 							result = 9;
-							Error("Terminator is incorrect: 0x%x", this->_extComments.term);
+							BFErrorPrint("Terminator is incorrect: 0x%x", this->_extComments.term);
 						}
 					
 					// Plain text
@@ -362,7 +364,7 @@ int GIF::readBlocks() {
 						rsize = fread(&pt->blockSize, 1, 1, this->_fileHandler);
 						
 						if (pt->blockSize != 12) {
-							Error("Block size is: %d", pt->blockSize);
+							BFErrorPrint("Block size is: %d", pt->blockSize);
 							result = 20;
 						} else {
 							size = sizeof(ExtensionPlainText::TextGrid) 
@@ -375,7 +377,7 @@ int GIF::readBlocks() {
 
 							// Read plain text data
 							} else if (result = GIF::readSubBlocks(this->_fileHandler, &pt->data)) {
-								Error("Reading subblocks: %d", result);
+								BFErrorPrint("Reading subblocks: %d", result);
 
 							// Check terminator
 							} else if (!fread(&pt->term, 1, 1, this->_fileHandler)) {
@@ -391,17 +393,17 @@ int GIF::readBlocks() {
 						rsize = fread(&this->_extApplication.blockSize, 1, size, this->_fileHandler);
 						if (rsize != size) {
 							result = 26;
-							Error("Could not read %d bytes", size);
+							BFErrorPrint("Could not read %d bytes", size);
 						} else if (this->_extApplication.blockSize != 11) {
 							result = 27;
-							Error("Block size is %d\n", this->_extApplication.blockSize);
+							BFErrorPrint("Block size is %d\n", this->_extApplication.blockSize);
 						} else if (result = GIF::readSubBlocks(this->_fileHandler, &this->_extApplication.data)) {
-							Error("Sub block: %d\n", result);
+							BFErrorPrint("Sub block: %d\n", result);
 							result = 30;
 						} else if (!fread(&this->_extApplication.term, 1, 1, this->_fileHandler)) {
 							result = 28;
 						} else if (this->_extApplication.term != 0x00) {
-							Error("Error with terminator");
+							BFErrorPrint("Error with terminator");
 							result = 29;
 						}
 					}
@@ -416,9 +418,9 @@ int GIF::readBlocks() {
 int GIF::unload() {
 	if (this->_fileHandler) fclose(this->_fileHandler);
 
-	Free(this->_colorTableGlobal.red);
-	Free(this->_colorTableGlobal.green);
-	Free(this->_colorTableGlobal.blue);
+	BFFree(this->_colorTableGlobal.red);
+	BFFree(this->_colorTableGlobal.green);
+	BFFree(this->_colorTableGlobal.blue);
 
 	return 0;
 }
@@ -454,7 +456,7 @@ ImageType GIF::type() {
 }
 
 int GIF::toGIF() {
-	Error("'%s' is already a gif file!", this->path());
+	BFErrorPrint("'%s' is already a gif file!", this->path());
 	return 1;
 }
 
