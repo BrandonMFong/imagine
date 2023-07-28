@@ -7,7 +7,7 @@ include external/libs/makefiles/libpaths.mk
 ### Global
 BUILD_PATH = build
 FILES = appdriver image png jpeg gif tiff tiff2png
-CXXLINKS = -lpng -ljpeg -ltiff
+CXXLINKS = -lpng -ljpeg -ltiff -luuid
 
 ### Release settings
 R_CXXFLAGS += -I. -Iexternal/libs/$(BF_LIB_RPATH_RELEASE) -Iexternal
@@ -41,6 +41,9 @@ all: release
 clean:
 	rm -rfv build
 	rm -rfv bin
+
+update-dependencies:
+	cd ./external/libs && git pull && make
 
 ## Release build instructions
 release: release-setup bin/$(R_BIN_NAME)
