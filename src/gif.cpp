@@ -42,7 +42,7 @@ GIF::GIF(const char * path, int * err) : Image(path, err) {
 
 	this->_header = {0};
 	this->_colorTableGlobal = {0};
-	this->_imageData.setObjectMemoryHandler(GIF::imageDataFree);
+	this->_imageData.setDeallocateCallback(GIF::imageDataFree);
 
 	if (err) *err = error;
 }
